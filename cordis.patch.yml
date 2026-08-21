@@ -1,0 +1,10 @@
+- insert:
+    - id: ollama-cloud-sync
+      name: dsh-ollama-cloud
+      config:
+        route: ollama-cloud
+        displayName: Ollama Cloud
+        baseURL: https://ollama.com/v1
+        api: openai-completions
+        apiKeyEnv: OLLAMA_API_KEY
+        refreshMs: 21600000
