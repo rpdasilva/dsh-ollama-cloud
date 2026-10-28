@@ -68,6 +68,7 @@ function sameModels(a, b) {
     if (left?.id !== right?.id) return false
     if (left?.name !== right?.name) return false
     if (left?.contextWindow !== right?.contextWindow) return false
+    if (JSON.stringify(left?.input) !== JSON.stringify(right?.input)) return false
   }
 
   return true
@@ -223,7 +224,7 @@ function extractContextWindow(modelInfo) {
   return Math.max(...matches)
 }
 
-async function fetchContextWindow(
+async function fetchModelDetails(
   baseURL,
   apiKey,
   model,
@@ -248,7 +249,14 @@ async function fetchContextWindow(
     )
   }
 
-  return contextWindow
+  return {
+    contextWindow,
+    input:
+      Array.isArray(body?.capabilities) &&
+      body.capabilities.includes('vision')
+        ? ['text', 'image']
+        : ['text'],
+  }
 }
 
 async function buildModels(
@@ -274,8 +282,8 @@ async function buildModels(
    */
   for (const id of ids) {
     try {
-      const contextWindow =
-        await fetchContextWindow(
+      const details =
+        await fetchModelDetails(
           baseURL,
           apiKey,
           id,
@@ -285,7 +293,8 @@ async function buildModels(
       models.push({
         id,
         name: id,
-        contextWindow,
+        contextWindow: details.contextWindow,
+        input: details.input,
       })
 
       discovered += 1
@@ -308,6 +317,7 @@ async function buildModels(
               ? old.name
               : id,
           contextWindow: old.contextWindow,
+          input: old.input,
         })
 
         preserved += 1
@@ -622,4 +632,3 @@ export function apply(
     }
   }, 'ollama-cloud catalog sync')
 }
-
